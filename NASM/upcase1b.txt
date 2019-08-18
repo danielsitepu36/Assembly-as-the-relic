@@ -1,0 +1,168 @@
+     1                                  %INCLUDE "winAPI.inc"		;;Declare external procedure {winapi} in file winAPI.inc
+     1                              <1> extern ExitProcess
+     2                              <1> extern AllocConsole 
+     3                              <1> extern FreeConsole 
+     4                              <1> extern SetConsoleTitleA 
+     5                              <1> extern Sleep 
+     6                              <1> extern GetStdHandle
+     7                              <1> extern ReadFile
+     8                              <1> extern WriteFile
+     9                              <1> 
+    10                              <1> import ExitProcess		kernel32.dll
+    11                              <1> import AllocConsole		kernel32.dll 
+    12                              <1> import FreeConsole		kernel32.dll 
+    13                              <1> import SetConsoleTitleA		kernel32.dll 
+    14                              <1> import Sleep 			kernel32.dll
+    15                              <1> import GetStdHandle 		kernel32.dll
+    16                              <1> import ReadFile			kernel32.dll
+    17                              <1> import WriteFile		kernel32.dll
+     2                                  %INCLUDE "Console.mac"		;;Declare MACRO in file Console.mac
+     1                              <1> %macro BuatConsole 3
+     2                              <1> 	
+     3                              <1> 	call [AllocConsole] 
+     4                              <1> 
+     5                              <1> 	push dword %1 
+     6                              <1> 	call [SetConsoleTitleA] 
+     7                              <1> 
+     8                              <1> 	push dword -11 				
+     9                              <1> 	call [GetStdHandle] 
+    10                              <1> 	mov dword [%2], eax 
+    11                              <1> 
+    12                              <1> 	push dword -10				 
+    13                              <1> 	call [GetStdHandle] 
+    14                              <1> 	mov dword [%3], eax 
+    15                              <1> 
+    16                              <1> %endmacro
+    17                              <1> 
+    18                              <1> %macro TampilkanText 4
+    19                              <1> 	push dword 0 				
+    20                              <1> 	push dword %4				
+    21                              <1> 	push dword [%3] 			
+    22                              <1> 	push dword %2				
+    23                              <1> 	push dword [%1] 			
+    24                              <1> 	call [WriteFile] 
+    25                              <1> %endmacro
+    26                              <1> 
+    27                              <1> %macro BacaText 4
+    28                              <1> 	push dword 0 		
+    29                              <1> 	push dword %4 		
+    30                              <1> 	push dword [%3] 	
+    31                              <1> 	push dword %2 		
+    32                              <1> 	push dword [%1] 	
+    33                              <1> 	call [ReadFile] 			
+    34                              <1> %endmacro
+    35                              <1> 
+    36                              <1> %macro TutupConsole 0
+    37                              <1> 	call [FreeConsole] 
+    38                              <1> 	xor eax, eax 
+    39                              <1> 	push eax 
+    40                              <1> 	call [ExitProcess]
+    41                              <1> %endmacro
+    42                              <1> 
+    43                              <1> %macro Tunggu 1
+    44                              <1> 	push dword %1*1000 		;; delay %1/1000 second 
+    45                              <1> 	call [Sleep] 
+    46                              <1> %endmacro
+     3                                  
+     4                                  SEGMENT .DATA use32
+     5 00000000 555050455243415345-     Title   	db "UPPERCASE CONVERSION",0 
+     5 00000009 20434F4E5645525349-
+     5 00000012 4F4E00             
+     6                                  
+     7 00000015 0D0A57524954452054-     msg1 		db 13,10,"WRITE TEXT (Quit Just Enter): ",0
+     7 0000001E 455854202851756974-
+     7 00000027 204A75737420456E74-
+     7 00000030 6572293A2000       
+     8 00000036 21000000                msg1_len 	dd $-msg1
+     9 0000003A 0D0A434F4E56455254-     msg2 		db 13,10,"CONVERT TO UPCASE           : ",0
+     9 00000043 20544F205550434153-
+     9 0000004C 452020202020202020-
+     9 00000055 2020203A2000       
+    10 0000005B 21000000                msg2_len 	dd $-msg2
+    11                                  
+    12 0000005F <res 000000FF>          buff		resb 255
+    13 0000015E FF000000                buff_len	dd 255
+    14                                  
+    15                                  
+    16                                  SEGMENT .BSS  use32
+    17 00000000 <res 00000004>          hStdOut		resd 1 
+    18 00000004 <res 00000004>          hStdIn		resd 1 
+    19 00000008 <res 00000004>          nBytes		resd 1
+    20 0000000C <res 00000004>          iBytes		resd 1
+    21                                  
+    22                                  SEGMENT .CODE use32
+    23                                  ..start:
+    24                                  
+    25                                  BuatConsole 	Title, hStdOut, hStdIn
+    25                              <1> 
+    25 00000000 FF15[00000000]      <1>  call [AllocConsole]
+    25                              <1> 
+    25 00000006 68[00000000]        <1>  push dword %1
+    25 0000000B FF15[00000000]      <1>  call [SetConsoleTitleA]
+    25                              <1> 
+    25 00000011 6AF5                <1>  push dword -11
+    25 00000013 FF15[00000000]      <1>  call [GetStdHandle]
+    25 00000019 A3[00000000]        <1>  mov dword [%2], eax
+    25                              <1> 
+    25 0000001E 6AF6                <1>  push dword -10
+    25 00000020 FF15[00000000]      <1>  call [GetStdHandle]
+    25 00000026 A3[04000000]        <1>  mov dword [%3], eax
+    25                              <1> 
+    26                                  TampilkanText	hStdOut, msg1, msg1_len, nBytes
+    26 0000002B 6A00                <1>  push dword 0
+    26 0000002D 68[08000000]        <1>  push dword %4
+    26 00000032 FF35[36000000]      <1>  push dword [%3]
+    26 00000038 68[15000000]        <1>  push dword %2
+    26 0000003D FF35[00000000]      <1>  push dword [%1]
+    26 00000043 FF15[00000000]      <1>  call [WriteFile]
+    27                                  BacaText	hStdIn, buff, buff_len, iBytes
+    27 00000049 6A00                <1>  push dword 0
+    27 0000004B 68[0C000000]        <1>  push dword %4
+    27 00000050 FF35[5E010000]      <1>  push dword [%3]
+    27 00000056 68[5F000000]        <1>  push dword %2
+    27 0000005B FF35[04000000]      <1>  push dword [%1]
+    27 00000061 FF15[00000000]      <1>  call [ReadFile]
+    28                                  
+    29 00000067 833D[0C000000]02        CMP dword [iBytes],2    ;; Jika hanya ditekan Enter (2 char) maka Exit
+    30 0000006E 7446                    JE  exit
+    31                                  
+    32 00000070 E851000000              CALL UbahKeBesar
+    33                                  
+    34                                  TampilkanText	hStdOut, msg2, msg2_len, nBytes
+    34 00000075 6A00                <1>  push dword 0
+    34 00000077 68[08000000]        <1>  push dword %4
+    34 0000007C FF35[5B000000]      <1>  push dword [%3]
+    34 00000082 68[3A000000]        <1>  push dword %2
+    34 00000087 FF35[00000000]      <1>  push dword [%1]
+    34 0000008D FF15[00000000]      <1>  call [WriteFile]
+    35                                  TampilkanText	hStdOut, buff, iBytes, nBytes
+    35 00000093 6A00                <1>  push dword 0
+    35 00000095 68[08000000]        <1>  push dword %4
+    35 0000009A FF35[0C000000]      <1>  push dword [%3]
+    35 000000A0 68[5F000000]        <1>  push dword %2
+    35 000000A5 FF35[00000000]      <1>  push dword [%1]
+    35 000000AB FF15[00000000]      <1>  call [WriteFile]
+    36                                  
+    37 000000B1 E94AFFFFFF              JMP ..start
+    38                                  
+    39                                  exit: 
+    40                                  TutupConsole
+    40 000000B6 FF15[00000000]      <1>  call [FreeConsole]
+    40 000000BC 31C0                <1>  xor eax, eax
+    40 000000BE 50                  <1>  push eax
+    40 000000BF FF15[00000000]      <1>  call [ExitProcess]
+    41                                  	
+    42 000000C5 C3                      RET
+    43                                  
+    44                                  UbahKeBesar:
+    45                                  
+    46 000000C6 8B0D[0C000000]          	MOV ECX, [iBytes]	;; iBytes menyimpan panjang string yang dituliskan, termasuk Enter (2 bytes: 13,10)
+    47 000000CC 83E902                  	SUB ECX, 2
+    48 000000CF BB[5F000000]            	MOV EBX, dword buff
+    49                                  
+    50                                  	ups:
+    51 000000D4 802B20                  	 SUB byte [EBX],32
+    52 000000D7 43                      	 INC EBX
+    53 000000D8 E2FA                    	 LOOP ups
+    54                                  
+    55 000000DA C3                      	RET

@@ -1,0 +1,24 @@
+     1                                  SEGMENT .DATA use32
+     2 00000000 05000000                data1 dd 0005
+     3 00000004 0F000000                data2 dd 0015
+     4 00000008 00000000                hasil dd 0
+     5                                  
+     6                                  SEGMENT .CODE use32
+     7                                  ..start:
+     8 00000000 FF35[00000000]          	PUSH DWORD [data1]
+     9 00000006 FF35[04000000]          	PUSH DWORD [data2]
+    10                                  
+    11 0000000C FF15[19000000]          	CALL [tambahkan]
+    12                                  
+    13 00000012 8F05[08000000]                  POP DWORD [hasil]
+    14                                  	
+    15                                  	
+    16 00000018 C3                      RET
+    17                                  
+    18                                  tambahkan:
+    19                                  	
+    20 00000019 5B                      	POP EBX
+    21 0000001A 58                      	POP EAX	
+    22 0000001B 01D8                    	ADD EAX, EBX
+    23 0000001D 50                      	PUSH EAX
+    24 0000001E C3                              RET

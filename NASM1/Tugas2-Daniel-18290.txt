@@ -1,0 +1,481 @@
+     1                                  %INCLUDE "winAPI.inc"		;;Declare external procedure {winapi}
+     1                              <1> extern ExitProcess
+     2                              <1> extern AllocConsole 
+     3                              <1> extern FreeConsole 
+     4                              <1> extern SetConsoleTitleA 
+     5                              <1> extern Sleep 
+     6                              <1> extern GetStdHandle
+     7                              <1> extern ReadFile
+     8                              <1> extern WriteFile
+     9                              <1> 
+    10                              <1> import ExitProcess		kernel32.dll
+    11                              <1> import AllocConsole		kernel32.dll 
+    12                              <1> import FreeConsole		kernel32.dll 
+    13                              <1> import SetConsoleTitleA		kernel32.dll 
+    14                              <1> import Sleep 			kernel32.dll
+    15                              <1> import GetStdHandle 		kernel32.dll
+    16                              <1> import ReadFile			kernel32.dll
+    17                              <1> import WriteFile		kernel32.dll
+     2                                  %INCLUDE "Console.mac"		;;Macro definition
+     1                              <1> %macro BuatConsole 3
+     2                              <1> 	
+     3                              <1> 	call [AllocConsole] 
+     4                              <1> 
+     5                              <1> 	push dword %1 
+     6                              <1> 	call [SetConsoleTitleA] 
+     7                              <1> 
+     8                              <1> 	push dword -11 				
+     9                              <1> 	call [GetStdHandle] 
+    10                              <1> 	mov dword [%2], eax 
+    11                              <1> 
+    12                              <1> 	push dword -10				 
+    13                              <1> 	call [GetStdHandle] 
+    14                              <1> 	mov dword [%3], eax 
+    15                              <1> 
+    16                              <1> %endmacro
+    17                              <1> 
+    18                              <1> %macro TampilkanText 4
+    19                              <1> 	push dword 0 				
+    20                              <1> 	push dword %4				
+    21                              <1> 	push dword [%3] 			
+    22                              <1> 	push dword %2				
+    23                              <1> 	push dword [%1] 			
+    24                              <1> 	call [WriteFile] 
+    25                              <1> %endmacro
+    26                              <1> 
+    27                              <1> %macro BacaText 4
+    28                              <1> 	push dword 0 		
+    29                              <1> 	push dword %4 		
+    30                              <1> 	push dword [%3] 	
+    31                              <1> 	push dword %2 		
+    32                              <1> 	push dword [%1] 	
+    33                              <1> 	call [ReadFile] 			
+    34                              <1> %endmacro
+    35                              <1> 
+    36                              <1> %macro TutupConsole 0
+    37                              <1> 	call [FreeConsole] 
+    38                              <1> 	xor eax, eax 
+    39                              <1> 	push eax 
+    40                              <1> 	call [ExitProcess]
+    41                              <1> %endmacro
+    42                              <1> 
+    43                              <1> %macro Tunggu 1
+    44                              <1> 	push dword %1*1000 		;; delay %1/1000 second 
+    45                              <1> 	call [Sleep] 
+    46                              <1> %endmacro
+     3                                  
+     4                                  SEGMENT .DATA use32
+     5 00000000 4D494B524F50524F53-     Title   	db "MIKROPROSESOR DANIEL - 18290",0 
+     5 00000009 45534F522044414E49-
+     5 00000012 454C202D2031383239-
+     5 0000001B 3000               
+     6                                  
+     7 0000001D 0D0A2D2D2D44616E69-     msg0 		db 13,10,"---Daniel Suranta S / 18-424185-PA-18290---",0
+     7 00000026 656C20537572616E74-
+     7 0000002F 612053202F2031382D-
+     7 00000038 3432343138352D5041-
+     7 00000041 2D31383239302D2D2D-
+     7 0000004A 00                 
+     8 0000004B 2E000000                msg0_len 	dd $-msg0
+     9 0000004F 0D0A3D3D3D3D3D3D3D-     deco		db 13,10,"===========================================",0
+     9 00000058 3D3D3D3D3D3D3D3D3D-
+     9 00000061 3D3D3D3D3D3D3D3D3D-
+     9 0000006A 3D3D3D3D3D3D3D3D3D-
+     9 00000073 3D3D3D3D3D3D3D3D3D-
+     9 0000007C 00                 
+    10 0000007D 2E000000                deco_len	dd $-deco
+    11 00000081 0D0A54656B616E2045-     msgout 		db 13,10,"Tekan ENTER untuk keluar dari program !",0
+    11 0000008A 4E54455220756E7475-
+    11 00000093 6B206B656C75617220-
+    11 0000009C 646172692070726F67-
+    11 000000A5 72616D202100       
+    12 000000AB 2A000000                msgo_len 	dd $-msgout
+    13 000000AF 0D0A416E676B612070-     msg1 		db 13,10,"Angka pertama     =>",0
+    13 000000B8 657274616D61202020-
+    13 000000C1 20203D3E00         
+    14 000000C6 17000000                msg1_len 	dd $-msg1
+    15 000000CA 416E676B61206B6564-     msg2 		db "Angka kedua       =>",0
+    15 000000D3 756120202020202020-
+    15 000000DC 3D3E00             
+    16 000000DF 15000000                msg2_len 	dd $-msg2
+    17 000000E3 0D0A4D6173756B6B61-     msg3 		db 13,10,"Masukkan Operasi, Untuk pengurangan hasil bisa negatif, pembagian termasuk hasil dan sisa bagi(modulo)",0
+    17 000000EC 6E204F706572617369-
+    17 000000F5 2C20556E74756B2070-
+    17 000000FE 656E677572616E6761-
+    17 00000107 6E20686173696C2062-
+    17 00000110 697361206E65676174-
+    17 00000119 69662C2070656D6261-
+    17 00000122 6769616E207465726D-
+    17 0000012B 6173756B2068617369-
+    17 00000134 6C2064616E20736973-
+    17 0000013D 612062616769286D6F-
+    17 00000146 64756C6F2900       
+    18 0000014C 69000000                msg3_len 	dd $-msg3
+    19 00000150 0D0A4F706572617369-     msg4 		db 13,10,"Operasi (+,-,*,/) => ",0
+    19 00000159 20282B2C2D2C2A2C2F-
+    19 00000162 29203D3E2000       
+    20 00000168 18000000                msg4_len 	dd $-msg4
+    21 0000016C 0D0A496E7075742079-     wrong 		db 13,10,"Input yang anda masukkan salah !",13,10,0
+    21 00000175 616E6720616E646120-
+    21 0000017E 6D6173756B6B616E20-
+    21 00000187 73616C616820210D0A-
+    21 00000190 00                 
+    22 00000191 25000000                wrong_len 	dd $-wrong
+    23 00000195 0D0A486173696C2070-     msg5 		db 13,10,"Hasil perhitungan => ",0
+    23 0000019E 6572686974756E6761-
+    23 000001A7 6E203D3E2000       
+    24 000001AD 18000000                msg5_len 	dd $-msg5
+    25 000001B1 0D0A0D0A544552494D-     msg6 		db 13,10,13,10,"TERIMA KASIH",13,10,0
+    25 000001BA 41204B415349480D0A-
+    25 000001C3 00                 
+    26 000001C4 13000000                msg6_len 	dd $-msg6
+    27 000001C8 0D0A486173696C2070-     msgdiv1		db 13,10,"Hasil pembagian   => ",0
+    27 000001D1 656D62616769616E20-
+    27 000001DA 20203D3E2000       
+    28 000001E0 18000000                msgd1_len 	dd $-msgdiv1
+    29 000001E4 0D0A53697361207065-     msgdiv2		db 13,10,"Sisa pembagian    => ",0
+    29 000001ED 6D62616769616E2020-
+    29 000001F6 20203D3E2000       
+    30 000001FC 18000000                msgd2_len 	dd $-msgdiv2
+    31                                  
+    32 00000200 <res 000000FF>          op          resb 255
+    33 000002FF FF000000                op_len      dd 255
+    34                                  
+    35 00000303 <res 000000FF>          buff		resb 255
+    36 00000402 FF000000                buff_len	dd 255
+    37                                  
+    38 00000406 20202020202000          strhasil	db '      ',0
+    39 0000040D 06                      str_len		db 6   
+    40                                  
+    41                                  
+    42                                  SEGMENT .BSS  use32
+    43 00000000 <res 00000004>          hStdOut		resd 1 
+    44 00000004 <res 00000004>          hStdIn		resd 1 
+    45 00000008 <res 00000004>          nBytes		resd 1
+    46 0000000C <res 00000004>          iBytes		resd 1
+    47 00000010 <res 00000004>          oBytes      resd 1
+    48 00000014 <res 00000004>          Bil1		resd 1
+    49 00000018 <res 00000004>          Bil2		resd 1
+    50                                  
+    51                                  
+    52                                  SEGMENT .CODE use32
+    53                                  ..start:
+    54                                  
+    55                                  BuatConsole 	Title, hStdOut, hStdIn
+    55                              <1> 
+    55 00000000 FF15[00000000]      <1>  call [AllocConsole]
+    55                              <1> 
+    55 00000006 68[00000000]        <1>  push dword %1
+    55 0000000B FF15[00000000]      <1>  call [SetConsoleTitleA]
+    55                              <1> 
+    55 00000011 6AF5                <1>  push dword -11
+    55 00000013 FF15[00000000]      <1>  call [GetStdHandle]
+    55 00000019 A3[00000000]        <1>  mov dword [%2], eax
+    55                              <1> 
+    55 0000001E 6AF6                <1>  push dword -10
+    55 00000020 FF15[00000000]      <1>  call [GetStdHandle]
+    55 00000026 A3[04000000]        <1>  mov dword [%3], eax
+    55                              <1> 
+    56                                  
+    57                                  TampilkanText	hStdOut, deco, deco_len, nBytes
+    57 0000002B 6A00                <1>  push dword 0
+    57 0000002D 68[08000000]        <1>  push dword %4
+    57 00000032 FF35[7D000000]      <1>  push dword [%3]
+    57 00000038 68[4F000000]        <1>  push dword %2
+    57 0000003D FF35[00000000]      <1>  push dword [%1]
+    57 00000043 FF15[00000000]      <1>  call [WriteFile]
+    58                                  TampilkanText	hStdOut, msg0, msg0_len, nBytes
+    58 00000049 6A00                <1>  push dword 0
+    58 0000004B 68[08000000]        <1>  push dword %4
+    58 00000050 FF35[4B000000]      <1>  push dword [%3]
+    58 00000056 68[1D000000]        <1>  push dword %2
+    58 0000005B FF35[00000000]      <1>  push dword [%1]
+    58 00000061 FF15[00000000]      <1>  call [WriteFile]
+    59                                  TampilkanText	hStdOut, deco, deco_len, nBytes
+    59 00000067 6A00                <1>  push dword 0
+    59 00000069 68[08000000]        <1>  push dword %4
+    59 0000006E FF35[7D000000]      <1>  push dword [%3]
+    59 00000074 68[4F000000]        <1>  push dword %2
+    59 00000079 FF35[00000000]      <1>  push dword [%1]
+    59 0000007F FF15[00000000]      <1>  call [WriteFile]
+    60                                  
+    61                                  
+    62                                  TampilkanText	hStdOut, msgout, msgo_len, nBytes
+    62 00000085 6A00                <1>  push dword 0
+    62 00000087 68[08000000]        <1>  push dword %4
+    62 0000008C FF35[AB000000]      <1>  push dword [%3]
+    62 00000092 68[81000000]        <1>  push dword %2
+    62 00000097 FF35[00000000]      <1>  push dword [%1]
+    62 0000009D FF15[00000000]      <1>  call [WriteFile]
+    63                                  TampilkanText	hStdOut, msg1, msg1_len, nBytes
+    63 000000A3 6A00                <1>  push dword 0
+    63 000000A5 68[08000000]        <1>  push dword %4
+    63 000000AA FF35[C6000000]      <1>  push dword [%3]
+    63 000000B0 68[AF000000]        <1>  push dword %2
+    63 000000B5 FF35[00000000]      <1>  push dword [%1]
+    63 000000BB FF15[00000000]      <1>  call [WriteFile]
+    64                                  BacaText		hStdIn, buff, buff_len, iBytes
+    64 000000C1 6A00                <1>  push dword 0
+    64 000000C3 68[0C000000]        <1>  push dword %4
+    64 000000C8 FF35[02040000]      <1>  push dword [%3]
+    64 000000CE 68[03030000]        <1>  push dword %2
+    64 000000D3 FF35[04000000]      <1>  push dword [%1]
+    64 000000D9 FF15[00000000]      <1>  call [ReadFile]
+    65                                  
+    66 000000DF 833D[0C000000]02        CMP dword [iBytes],2    ;; if just Enter (2 char) then Exit
+    67 000000E6 0F8463020000            JE  exit
+    68                                  
+    69 000000EC E868020000              CALL Str2Bil
+    70 000000F1 A3[14000000]            MOV  [Bil1], EAX
+    71                                  
+    72                                  TampilkanText	hStdOut, msg2, msg2_len, nBytes
+    72 000000F6 6A00                <1>  push dword 0
+    72 000000F8 68[08000000]        <1>  push dword %4
+    72 000000FD FF35[DF000000]      <1>  push dword [%3]
+    72 00000103 68[CA000000]        <1>  push dword %2
+    72 00000108 FF35[00000000]      <1>  push dword [%1]
+    72 0000010E FF15[00000000]      <1>  call [WriteFile]
+    73                                  BacaText		hStdIn, buff, buff_len, iBytes
+    73 00000114 6A00                <1>  push dword 0
+    73 00000116 68[0C000000]        <1>  push dword %4
+    73 0000011B FF35[02040000]      <1>  push dword [%3]
+    73 00000121 68[03030000]        <1>  push dword %2
+    73 00000126 FF35[04000000]      <1>  push dword [%1]
+    73 0000012C FF15[00000000]      <1>  call [ReadFile]
+    74                                  
+    75 00000132 E822020000              CALL Str2Bil
+    76 00000137 A3[18000000]            MOV  [Bil2], EAX
+    77                                  
+    78                                  INPUT:
+    79                                      TampilkanText	hStdOut, msg3, msg3_len, nBytes
+    79 0000013C 6A00                <1>  push dword 0
+    79 0000013E 68[08000000]        <1>  push dword %4
+    79 00000143 FF35[4C010000]      <1>  push dword [%3]
+    79 00000149 68[E3000000]        <1>  push dword %2
+    79 0000014E FF35[00000000]      <1>  push dword [%1]
+    79 00000154 FF15[00000000]      <1>  call [WriteFile]
+    80                                      TampilkanText	hStdOut, msg4, msg4_len, nBytes
+    80 0000015A 6A00                <1>  push dword 0
+    80 0000015C 68[08000000]        <1>  push dword %4
+    80 00000161 FF35[68010000]      <1>  push dword [%3]
+    80 00000167 68[50010000]        <1>  push dword %2
+    80 0000016C FF35[00000000]      <1>  push dword [%1]
+    80 00000172 FF15[00000000]      <1>  call [WriteFile]
+    81                                      BacaText		hStdIn, op, op_len, oBytes              ;Membaca operator
+    81 00000178 6A00                <1>  push dword 0
+    81 0000017A 68[10000000]        <1>  push dword %4
+    81 0000017F FF35[FF020000]      <1>  push dword [%3]
+    81 00000185 68[00020000]        <1>  push dword %2
+    81 0000018A FF35[04000000]      <1>  push dword [%1]
+    81 00000190 FF15[00000000]      <1>  call [ReadFile]
+    82                                  
+    83 00000196 B9[00020000]                mov ECX,op
+    84                                  
+    85 0000019B 80392B                      cmp byte [ECX],43                       ;Jika '+' jump ke PLUS
+    86 0000019E 7436                        je PLUS
+    87 000001A0 80392D                      cmp byte [ECX],45                       ;Jika '-' jump ke MINUS
+    88 000001A3 7446                        je MINUS
+    89 000001A5 80392A                      cmp byte [ECX],42                       ;Jika '*' jump ke MINUSS
+    90 000001A8 7477                        je TIMESS
+    91 000001AA 80392F                      cmp byte [ECX],47                       ;Jika '/' jump ke DIVIDE
+    92 000001AD 0F8489000000                je DIVIDE
+    93                                  
+    94                                      TampilkanText	hStdOut, wrong, wrong_len, nBytes
+    94 000001B3 6A00                <1>  push dword 0
+    94 000001B5 68[08000000]        <1>  push dword %4
+    94 000001BA FF35[91010000]      <1>  push dword [%3]
+    94 000001C0 68[6C010000]        <1>  push dword %2
+    94 000001C5 FF35[00000000]      <1>  push dword [%1]
+    94 000001CB FF15[00000000]      <1>  call [WriteFile]
+    95 000001D1 E966FFFFFF                  jmp INPUT
+    96                                  
+    97                                  PLUS:
+    98 000001D6 A1[18000000]                mov EAX, [Bil2]
+    99 000001DB 0305[14000000]              add EAX, [Bil1]                         ;Tambahkan Bil1 ke EAX (Bil2), hasil di EAX
+   100 000001E1 E897010000                  CALL Numeric2Str
+   101 000001E6 E905010000                  jmp HASIL
+   102                                  
+   103                                  MINUS:
+   104 000001EB A1[14000000]                mov EAX, [Bil1]
+   105 000001F0 3B05[18000000]              cmp EAX, [Bil2]
+   106 000001F6 7F17                        jg POS                                  ;Apabila bil1>bil2, jump ke POS (hasil positif)
+   107 000001F8 A1[18000000]                mov EAX, [Bil2]
+   108 000001FD 8B1D[14000000]              mov EBX, [Bil1]
+   109 00000203 29D8                        sub EAX, EBX                            ;Jika bil1<bil2, kurangi bil2 dengan bil1
+   110 00000205 E898010000                  CALL Numeric2StrNEG                     ;Hasil di EAX, konversi khusus hasil negatif
+   111 0000020A E9E1000000                  jmp HASIL
+   112                                      POS:
+   113 0000020F 8B1D[18000000]                  mov EBX, [Bil2]
+   114 00000215 29D8                            sub EAX, EBX                        ;Jika positif kurangi bil1 dengan bil2
+   115 00000217 E861010000                      CALL Numeric2Str                    ;Hasil di EAX, konversi seperti biasa
+   116 0000021C E9CF000000                      jmp HASIL
+   117                                  
+   118                                  TIMESS:
+   119 00000221 31D2                        xor EDX,EDX                             ;Kosongkan EDX
+   120 00000223 A1[18000000]                mov EAX,[Bil2]
+   121 00000228 8B1D[14000000]              mov EBX, [Bil1]
+   122 0000022E F7E3                        mul EBX                                 ;Kali EAX(bil1) dengan EBX(bil2), hasil pada EAX
+   123 00000230 31D2                        xor EDX,EDX                             ;Kosongkan EDX
+   124 00000232 E846010000                  CALL Numeric2Str		                ;Konversi EAX ke String
+   125 00000237 E9B4000000                  jmp HASIL
+   126                                  
+   127                                  DIVIDE:
+   128 0000023C 31D2                        xor EDX,EDX                             ;Kosongkan EDX
+   129 0000023E A1[14000000]                mov EAX, [Bil1]
+   130 00000243 8B1D[18000000]              mov EBX, [Bil2]
+   131 00000249 F7F3                        div EBX                                 ;Bagi EAX(bil1) dengan EBX(bil2), hasil pada EAX
+   132 0000024B 31D2                        xor EDX,EDX                             ;Kosongkan EDX
+   133 0000024D E82B010000                  CALL Numeric2Str                        ;Konversi dan tampilkan EAX (Hasil Bagi)
+   134                                      TampilkanText	hStdOut, msgdiv1, msgd1_len, nBytes
+   134 00000252 6A00                <1>  push dword 0
+   134 00000254 68[08000000]        <1>  push dword %4
+   134 00000259 FF35[E0010000]      <1>  push dword [%3]
+   134 0000025F 68[C8010000]        <1>  push dword %2
+   134 00000264 FF35[00000000]      <1>  push dword [%1]
+   134 0000026A FF15[00000000]      <1>  call [WriteFile]
+   135                                      TampilkanText	hStdOut, strhasil, str_len, nBytes
+   135 00000270 6A00                <1>  push dword 0
+   135 00000272 68[08000000]        <1>  push dword %4
+   135 00000277 FF35[0D040000]      <1>  push dword [%3]
+   135 0000027D 68[06040000]        <1>  push dword %2
+   135 00000282 FF35[00000000]      <1>  push dword [%1]
+   135 00000288 FF15[00000000]      <1>  call [WriteFile]
+   136 0000028E 31D2                        xor EDX,EDX
+   137 00000290 A1[14000000]                mov EAX, [Bil1]                         ;Ulangi proses untuk mendapatkan sisa bagi
+   138 00000295 8B1D[18000000]              mov EBX, [Bil2]
+   139 0000029B F7F3                        div EBX
+   140 0000029D 83FA00                      cmp EDX,0                               ;Jika sisa bagi 0, EAX akan diisi '0'
+   141 000002A0 7507                        jne NOTZERO             
+   142 000002A2 B800000000                  mov EAX,0
+   143 000002A7 EB02                        jmp NEXTDIV
+   144                                          NOTZERO:
+   145 000002A9 89D0                            mov EAX,EDX                         ;Jika sisa bagi tidak 0, EAX akan diisi EDX (sisa pembagian)
+   146                                      NEXTDIV:
+   147 000002AB 31D2                        xor EDX,EDX                             ;Kosongkan EDX
+   148 000002AD E8CB000000                  CALL Numeric2Str                        ;Konversi dan tampilkan EAX (Sisa Bagi)
+   149                                      TampilkanText	hStdOut, msgdiv2, msgd2_len, nBytes
+   149 000002B2 6A00                <1>  push dword 0
+   149 000002B4 68[08000000]        <1>  push dword %4
+   149 000002B9 FF35[FC010000]      <1>  push dword [%3]
+   149 000002BF 68[E4010000]        <1>  push dword %2
+   149 000002C4 FF35[00000000]      <1>  push dword [%1]
+   149 000002CA FF15[00000000]      <1>  call [WriteFile]
+   150                                      TampilkanText	hStdOut, strhasil, str_len, nBytes
+   150 000002D0 6A00                <1>  push dword 0
+   150 000002D2 68[08000000]        <1>  push dword %4
+   150 000002D7 FF35[0D040000]      <1>  push dword [%3]
+   150 000002DD 68[06040000]        <1>  push dword %2
+   150 000002E2 FF35[00000000]      <1>  push dword [%1]
+   150 000002E8 FF15[00000000]      <1>  call [WriteFile]
+   151 000002EE EB3C                        jmp END
+   152                                  
+   153                                  HASIL:
+   154                                  TampilkanText	hStdOut, msg5, msg5_len, nBytes
+   154 000002F0 6A00                <1>  push dword 0
+   154 000002F2 68[08000000]        <1>  push dword %4
+   154 000002F7 FF35[AD010000]      <1>  push dword [%3]
+   154 000002FD 68[95010000]        <1>  push dword %2
+   154 00000302 FF35[00000000]      <1>  push dword [%1]
+   154 00000308 FF15[00000000]      <1>  call [WriteFile]
+   155                                  TampilkanText	hStdOut, strhasil, str_len, nBytes		; Tampilkan hasil setelah EAX dikonversi ke STRING
+   155 0000030E 6A00                <1>  push dword 0
+   155 00000310 68[08000000]        <1>  push dword %4
+   155 00000315 FF35[0D040000]      <1>  push dword [%3]
+   155 0000031B 68[06040000]        <1>  push dword %2
+   155 00000320 FF35[00000000]      <1>  push dword [%1]
+   155 00000326 FF15[00000000]      <1>  call [WriteFile]
+   156                                  
+   157                                  END:
+   158                                  TampilkanText	hStdOut, msg6, msg6_len, nBytes
+   158 0000032C 6A00                <1>  push dword 0
+   158 0000032E 68[08000000]        <1>  push dword %4
+   158 00000333 FF35[C4010000]      <1>  push dword [%3]
+   158 00000339 68[B1010000]        <1>  push dword %2
+   158 0000033E FF35[00000000]      <1>  push dword [%1]
+   158 00000344 FF15[00000000]      <1>  call [WriteFile]
+   159                                  
+   160 0000034A E9B1FCFFFF              JMP ..start                                             ;Loop ke awal sampai enter ditekan
+   161                                  
+   162                                  exit:
+   163 0000034F 6A00                    push 0
+   164 00000351 FF15[00000000]          call [ExitProcess]
+   165 00000357 C9                      leave
+   166 00000358 C3                      RET
+   167                                  
+   168                                  ;=================================================================================================
+   169                                  ; CONVERT string(buff) to NUMERIC  result in register EAX 
+   170                                  ;-------------------------------------------------------------------------------------
+   171                                  Str2Bil:
+   172 00000359 31C0                            xor eax,eax			;set hasil = 0
+   173 0000035B BE0A000000                      mov esi, 10			;pengali 10
+   174 00000360 BB[03030000]                    mov ebx, buff
+   175 00000365 8B0D[0C000000]          	mov ecx, [iBytes]
+   176 0000036B 83E902                  	sub ecx, 2
+   177 0000036E 31D2                    	xor edx,edx
+   178                                      Loopbil:
+   179 00000370 F7E6                            mul esi 			;hasil sebelumnya * 10
+   180 00000372 8A13                            mov dl, byte [ebx]
+   181 00000374 80EA30                          sub dl,30h 			;ubah ke 0-9
+   182 00000377 01D0                            add eax,edx 			;tambahkan dg digit terakhir 
+   183 00000379 43                              inc ebx
+   184 0000037A E2F4                            loop Loopbil
+   185                                      
+   186 0000037C C3                      ret
+   187                                  
+   188                                  ; CONVERT Numeric (EAX) TO STRING (strhasil) 
+   189                                  ;-------------------------------------------------------------------------------------
+   190                                  Numeric2Str: 
+   191                                  
+   192 0000037D BB[06040000]            	mov ebx, strhasil	;; hasil konversi disimpan di strhasil  
+   193                                   
+   194                                   loop1:
+   195 00000382 803B00                      cmp byte[ebx],0		;; diposisikan pada akhir string strhasil
+   196 00000385 7406                        je NEXTNULL
+   197 00000387 C60320                      mov byte[ebx],32
+   198 0000038A 43                          inc ebx
+   199 0000038B EBF5                        jmp loop1
+   200                                  
+   201                                  NEXTNULL:
+   202 0000038D 4B                      	dec ebx
+   203                                  
+   204 0000038E 66BE0A00                	mov si,10	      		
+   205                                   loop2:				
+   206 00000392 31D2                    	xor edx, edx		;; edx di-nolkan untuk menampung sisa bagi
+   207 00000394 66F7F6                  	div si			;; dilakukan pembagian 10 berulang
+   208 00000397 80C230                  	add dl, '0'        	;; sisa bagi pada edx (dl) di ubah ke character
+   209 0000039A 8813                    	mov [ebx], dl		;; simpan ke strhasil dari belakang ke depan
+   210 0000039C 4B                      	dec ebx			;; majukan pointer
+   211 0000039D 09C0                    	or  eax,eax		;; test apakah yang dibagi sudah nol
+   212 0000039F 75F1                    	jnz loop2 		;; selesai perulangan jika yang dibagi sdh nol   
+   213                                  
+   214 000003A1 C3                      ret
+   215                                  
+   216                                  ; CONVERT Numeric (EAX) TO STRING (strhasil) KHUSUS PENGURANGAN NEGATIF
+   217                                  ;-------------------------------------------------------------------------------------
+   218                                  Numeric2StrNEG: 
+   219                                  
+   220 000003A2 BB[06040000]            	mov ebx, strhasil	;; hasil konversi disimpan di strhasil  
+   221                                   
+   222                                   loop1NEG:
+   223 000003A7 803B00                      cmp byte[ebx],0		;; diposisikan pada akhir string strhasil
+   224 000003AA 7406                        je NEXTNULLNEG
+   225 000003AC C60320                      mov byte[ebx],32
+   226 000003AF 43                          inc ebx
+   227 000003B0 EBF5                        jmp loop1NEG
+   228                                  
+   229                                  NEXTNULLNEG:
+   230 000003B2 4B                      	dec ebx
+   231                                  
+   232 000003B3 66BE0A00                	mov si,10	      		
+   233                                   loop2NEG:				
+   234 000003B7 31D2                    	xor edx, edx		;; edx di-nolkan untuk menampung sisa bagi
+   235 000003B9 66F7F6                  	div si			;; dilakukan pembagian 10 berulang
+   236 000003BC 80C230                  	add dl, '0'        	;; sisa bagi pada edx (dl) di ubah ke character
+   237 000003BF 8813                    	mov [ebx], dl		;; simpan ke strhasil dari belakang ke depan
+   238 000003C1 4B                      	dec ebx			;; majukan pointer
+   239 000003C2 09C0                    	or  eax,eax		;; test apakah yang dibagi sudah nol
+   240 000003C4 75F1                    	jnz loop2NEG 		;; selesai perulangan jika yang dibagi sdh nol   
+   241                                  
+   242 000003C6 C6032D                      mov byte[ebx],45    ;Tambahkan char '-' Ke depan
+   243                                  
+   244 000003C9 C3                      ret

@@ -1,0 +1,31 @@
+     1                                  extern ExitProcess
+     2                                  import ExitProcess kernel32.dll
+     3                                  
+     4                                  
+     5                                  SEGMENT .DATA use32
+     6 00000000 05000000                data1 dd 0005
+     7 00000004 0F000000                data2 dd 0015
+     8 00000008 00000000                hasil dd 0
+     9                                  
+    10                                  SEGMENT .CODE use32
+    11                                  ..start:
+    12 00000000 FF35[00000000]          	PUSH DWORD [data1]
+    13 00000006 FF35[04000000]          	PUSH DWORD [data2]
+    14                                  
+    15 0000000C FF15[22000000]          	CALL [tambahkan]
+    16                                  
+    17 00000012 8F05[08000000]                  POP DWORD [hasil]
+    18                                  	
+    19 00000018 6A00                    	push 0
+    20 0000001A FF15[00000000]          	call [ExitProcess]
+    21 00000020 C9                      	leave
+    22                                  	
+    23 00000021 C3                      RET
+    24                                  
+    25                                  tambahkan:
+    26                                  	
+    27 00000022 5B                      	POP EBX
+    28 00000023 58                      	POP EAX	
+    29 00000024 01D8                    	ADD EAX, EBX
+    30 00000026 50                      	PUSH EAX
+    31 00000027 C3                              RET

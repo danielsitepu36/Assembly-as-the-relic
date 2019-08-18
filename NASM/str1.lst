@@ -1,0 +1,117 @@
+     1                                  ;include "win32.inc"
+     2                                  
+     3                                  extern ExitProcess
+     4                                  extern AllocConsole 
+     5                                  extern FreeConsole 
+     6                                  extern SetConsoleTitleA 
+     7                                  extern Sleep 
+     8                                  extern GetStdHandle
+     9                                  extern ReadFile
+    10                                  extern WriteFile
+    11                                  
+    12                                  
+    13                                  import ExitProcess		kernel32.dll
+    14                                  import AllocConsole		kernel32.dll 
+    15                                  import FreeConsole		kernel32.dll 
+    16                                  import SetConsoleTitleA	kernel32.dll 
+    17                                  import Sleep 			kernel32.dll
+    18                                  import GetStdHandle 	kernel32.dll
+    19                                  import ReadFile			kernel32.dll
+    20                                  import WriteFile		kernel32.dll
+    21                                  
+    22                                  
+    23                                  SEGMENT .DATA use32
+    24 00000000 485552554620424553-     judul   	db "HURUF BESAR",0 
+    24 00000009 415200             
+    25                                  
+    26 0000000C 54554C4953204B414C-     msg 		db "TULIS KALIMAT:",0
+    26 00000015 494D41543A00       
+    27 0000001B 0F                      msg_len 	db 15		;;<--------- INI JUGA harus DD
+    28                                  
+    29                                  
+    30 0000001C <res 000000FF>          buff		resb 255
+    31 0000011B FF                      buff_len	db 255		;;<--------- INI JUGA harus DD
+    32                                  
+    33                                  
+    34                                  SEGMENT .BSS
+    35 00000000 <res 00000004>          hStdOut         resd 1 
+    36 00000004 <res 00000004>          hStdIn          resd 1 
+    37 00000008 <res 00000004>          nBytes          resd 1
+    38 0000000C <res 00000004>          iBytes          resd 1
+    39                                  
+    40                                  
+    41                                  
+    42                                  SEGMENT .CODE use32
+    43                                  ..start:
+    44                                  
+    45 00000000 FF15[00000000]          call [AllocConsole] 
+    46                                  	
+    47 00000006 68[00000000]            push dword judul 
+    48 0000000B FF15[00000000]          call [SetConsoleTitleA] 
+    49                                  	
+    50 00000011 6AF5                    push dword -11 			;; STD_OUTPUT_HANDLE = -11.
+    51 00000013 FF15[00000000]          call [GetStdHandle] 
+    52 00000019 A3[00000000]            mov dword [hStdOut], eax 
+    53                                  
+    54 0000001E 6AF6                    push dword -10			;; STD_INPUT_HANDLE = -10 
+    55 00000020 FF15[00000000]          call [GetStdHandle] 
+    56 00000026 A3[04000000]            mov dword [hStdIn], eax 
+    57                                  
+    58 0000002B 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    59 0000002D 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    60 00000032 FF35[1B000000]          push dword [msg_len] 		;; parameter ke 3 panjang string
+    61 00000038 68[0C000000]            push dword msg			;; parameter ke 2 string yang akan ditampilkan "Tulis Kalimat : "
+    62 0000003D FF35[00000000]          push dword [hStdOut] 		;; parameter ke 1 handle stdout
+    63 00000043 FF15[00000000]          call [WriteFile] 				
+    64                                  
+    65 00000049 6A00                    push dword 0 			;; parameter ke 5 dari ReadFile() adalah 0 
+    66 0000004B 68[0C000000]            push dword iBytes 		;; parameter ke 4 jumlah byte yg sesungguhnya terbaca
+    67 00000050 FF35[1B010000]          push dword [buff_len] 		;; parameter ke 3 panjang buffer yg disediakan
+    68 00000056 68[1C000000]            push dword buff 		;; parameter ke 2 buffer untuk menyimpan string yg dibaca 
+    69 0000005B FF35[04000000]          push dword [hStdIn] 		;; parameter ke 1 handle stdin
+    70 00000061 FF15[00000000]          call [ReadFile] 			
+    71                                  
+    72 00000067 B9[0C000000]            MOV ECX,iBytes			;; <------ INI YG SALAH SAAT RUN, SEHARUSNYA PAKAI [ ]
+    73 0000006C 83E902                  SUB ECX, 2
+    74                                  
+    75 0000006F BB[1C000000]            MOV EBX, dword buff
+    76                                  
+    77                                  ups:
+    78 00000074 8A03                         mov al, byte [EBX]
+    79 00000076 2C20                         sub al,32
+    80 00000078 8803                         mov byte [EBX], al
+    81                                  
+    82 0000007A 43                           INC EBX
+    83 0000007B E2F7                         LOOP ups
+    84                                  
+    85 0000007D 83C302                  ADD EBX,2
+    86 00000080 C60300                  MOV byte [EBX],0
+    87                                  
+    88                                  
+    89 00000083 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    90 00000085 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    91 0000008A FF35[1B000000]          push dword [msg_len] 	;; parameter ke 3 panjang string
+    92 00000090 68[0C000000]            push dword msg			;; parameter ke 2 string yang akan ditampilkan "Tulis Kalimat : "
+    93 00000095 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+    94 0000009B FF15[00000000]          call [WriteFile] 				
+    95                                  
+    96 000000A1 6A00                    push dword 0 			;; parameter ke 5 dari ReadFile() adalah 0 
+    97 000000A3 68[0C000000]            push dword iBytes 		;; parameter ke 4 jumlah byte yg sesungguhnya terbaca
+    98 000000A8 FF35[0C000000]          push dword [iBytes] 	;; parameter ke 3 panjang buffer yg disediakan
+    99 000000AE 68[1C000000]            push dword buff 		;; parameter ke 2 buffer untuk menyimpan string yg dibaca 
+   100 000000B3 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdin
+   101 000000B9 FF15[00000000]          call [WriteFile] 			
+   102                                  
+   103                                          
+   104 000000BF 6810270000              push dword 10000 		;; delay 10 second 
+   105 000000C4 FF15[00000000]          call [Sleep] 
+   106                                  
+   107 000000CA FF15[00000000]          call [FreeConsole] 
+   108                                  
+   109                                  	
+   110 000000D0 6A00                    push 0
+   111 000000D2 FF15[00000000]          call [ExitProcess]
+   112 000000D8 C9                      leave
+   113                                  	
+   114 000000D9 C3                      RET
+   115                                  

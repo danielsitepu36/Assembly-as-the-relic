@@ -1,0 +1,169 @@
+     1                                  %include "console.inc"
+     1                              <1> extern GetStdHandle 
+     2                              <1> extern WriteFile 
+     3                              <1> extern ReadFile 
+     4                              <1> extern AllocConsole 
+     5                              <1> extern FreeConsole 
+     6                              <1> extern SetConsoleTitleA 
+     7                              <1> extern SetConsoleCursorPosition 
+     8                              <1> extern Sleep 
+     9                              <1> extern ExitProcess 
+    10                              <1> EXTERN MessageBoxA
+    11                              <1> 
+    12                              <1> import GetStdHandle kernel32.dll 
+    13                              <1> import WriteFile kernel32.dll 
+    14                              <1> import ReadFile kernel32.dll 
+    15                              <1> import AllocConsole kernel32.dll 
+    16                              <1> import FreeConsole kernel32.dll 
+    17                              <1> import SetConsoleTitleA kernel32.dll 
+    18                              <1> import SetConsoleCursorPosition kernel32.dll 
+    19                              <1> import Sleep kernel32.dll 
+    20                              <1> import ExitProcess kernel32.dll
+    21                              <1> IMPORT MessageBoxA user32.dll 
+    22                              <1> 
+    23                              <1> %macro initconsole 3
+    24                              <1> 	
+    25                              <1> 	call [AllocConsole] 
+    26                              <1> 
+    27                              <1> 	push dword %1 
+    28                              <1> 	call [SetConsoleTitleA] 
+    29                              <1> 
+    30                              <1> 	push dword -11 				;; STD_OUTPUT_HANDLE = -11.
+    31                              <1> 	call [GetStdHandle] 
+    32                              <1> 	mov dword [%2], eax 
+    33                              <1> 
+    34                              <1> 	push dword -10				;; STD_INPUT_HANDLE = -10 
+    35                              <1> 	call [GetStdHandle] 
+    36                              <1> 	mov dword [%3], eax 
+    37                              <1> 
+    38                              <1> %endmacro
+    39                              <1> 
+    40                              <1> %macro quitconsole 0
+    41                              <1> 	call [FreeConsole] 
+    42                              <1> 	xor eax, eax 
+    43                              <1> 	push eax 
+    44                              <1> 	call [ExitProcess]
+    45                              <1> %endmacro
+    46                              <1> 
+    47                              <1> %macro delay 1
+    48                              <1> 	push dword %1 				;; delay %1/1000 second 
+    49                              <1> 	call [Sleep] 
+    50                              <1> %endmacro
+    51                              <1> 
+    52                              <1> %macro display_text 4
+    53                              <1> 	mov eax, %2			
+    54                              <1> 	sub eax, %1 		
+    55                              <1> 	dec eax 			
+    56                              <1> 	mov dword [%2], eax 
+    57                              <1> 
+    58                              <1> 	push dword 0 				;; parameter ke 5 dari WriteFile() adalah 0 
+    59                              <1> 	push dword %3				;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    60                              <1> 	push dword [%2] 			;; parameter ke 3 panjang string
+    61                              <1> 	push dword %1				;; parameter ke 2 string yang akan ditampilkan 
+    62                              <1> 	push dword [%4] 			;; parameter ke 1 handle stdout
+    63                              <1> 	call [WriteFile] 
+    64                              <1> %endmacro
+     2                                  
+     3 00000000 48656C6C6F6F00          judul	db "Helloo", 0 
+     4 00000007 0D0A0D0A20596F7572-     teks1   db 13,10,13,10," Your Name : ", 0 
+     4 00000010 204E616D65203A2000 
+     5 00000019 00000000                pteks1	dd 0 
+     6                                  
+     7 0000001D 48656C6C6F6F00          mbtitle db 'Helloo',0
+     8 00000024 476F6F64204D6F726E-     mbtext	db 'Good Morning '
+     8 0000002D 696E6720           
+     9                                  
+    10                                  
+    11 00000031 202D2D20476F642042-     text2   db ' -- God Bless You !!!',0
+    11 0000003A 6C65737320596F7520-
+    11 00000043 21212100           
+    12 00000047 16000000                ptext2  dd $-text2
+    13                                  
+    14 0000004B <res 00000010>          buff	resb 16
+    15 0000005B 10000000                buff_len	dd 16
+    16                                  
+    17                                  section .bss 	; Initialisasi variabel: hStdOut, hStdIn, nBytes, iBytes dg type double-word
+    18                                  
+    19 0000005F <res 00000004>          hStdOut         resd 1 
+    20 00000063 <res 00000004>          hStdIn          resd 1 
+    21 00000067 <res 00000004>          nBytes          resd 1
+    22 0000006B <res 00000004>          iBytes          resd 1
+    23                                  
+    24                                  
+    25                                  segment .code use32
+    26                                  ..start:	
+    27                                  
+    28                                   initconsole judul, hStdOut, hStdIn				; CREATE CONSOLE
+    28                              <1> 
+    28 00000000 FF15[00000000]      <1>  call [AllocConsole]
+    28                              <1> 
+    28 00000006 68[00000000]        <1>  push dword %1
+    28 0000000B FF15[00000000]      <1>  call [SetConsoleTitleA]
+    28                              <1> 
+    28 00000011 6AF5                <1>  push dword -11
+    28 00000013 FF15[00000000]      <1>  call [GetStdHandle]
+    28 00000019 A3[5F000000]        <1>  mov dword [%2], eax
+    28                              <1> 
+    28 0000001E 6AF6                <1>  push dword -10
+    28 00000020 FF15[00000000]      <1>  call [GetStdHandle]
+    28 00000026 A3[63000000]        <1>  mov dword [%3], eax
+    28                              <1> 
+    29                                   display_text teks1, pteks1, nBytes, hStdOut	; DISPLAY TEXT MESSAGE
+    29 0000002B B8[19000000]        <1>  mov eax, %2
+    29 00000030 2D[07000000]        <1>  sub eax, %1
+    29 00000035 48                  <1>  dec eax
+    29 00000036 A3[19000000]        <1>  mov dword [%2], eax
+    29                              <1> 
+    29 0000003B 6A00                <1>  push dword 0
+    29 0000003D 68[67000000]        <1>  push dword %3
+    29 00000042 FF35[19000000]      <1>  push dword [%2]
+    29 00000048 68[07000000]        <1>  push dword %1
+    29 0000004D FF35[5F000000]      <1>  push dword [%4]
+    29 00000053 FF15[00000000]      <1>  call [WriteFile]
+    30                                  
+    31 00000059 E8(3B000000)             call read_text									; READ TEXT FROM KEYBOARD
+    32                                  
+    33 0000005E E8(00000000)             call mbox
+    34                                  
+    35 00000063 6A00                     push dword 0
+    36 00000065 FF15[00000000]           call [ExitProcess]
+    37 0000006B C9                       leave
+    38 0000006C C3                      ret
+    39                                  
+    40                                  segment .data use32
+    41                                  
+    42                                  mbox:
+    43 00000000 BE[4B000000]             mov esi, buff		; mbtext + buff + text2 (menyambung 3 string)
+    44 00000005 0335[6B000000]           add esi, [iBytes]
+    45 0000000B 83EE02                   sub esi,2
+    46                                  
+    47 0000000E B220                     mov dl,' '
+    48 00000010 8816                     mov [esi], dl
+    49 00000012 46                       inc esi
+    50 00000013 8B0D[47000000]           mov ecx, [ptext2]
+    51 00000019 BB[31000000]             mov ebx, text2
+    52                                   cpt:
+    53 0000001E 8A13                    	mov dl, byte [ebx]
+    54 00000020 8816                    	mov [esi], dl
+    55 00000022 46                      	inc esi
+    56 00000023 43                      	inc ebx
+    57 00000024 E2F8                     loop cpt
+    58                                   
+    59 00000026 6A30                     push dword 30h			; tombol Button
+    60 00000028 68[1D000000]             push dword mbtitle		; judul windows
+    61 0000002D 68[24000000]             push dword mbtext  		; Pesan yg ditampilkan, diakhiri 0 (null)
+    62 00000032 6A00                     push dword 0			; owner windows dari msgbox, atau NULL (tdk punya owner)
+    63                                  
+    64 00000034 FF15[00000000]           call [MessageBoxA]
+    65 0000003A C3                      ret
+    66                                  
+    67                                  read_text:
+    68                                  							;; membaca string dari Console(keyboard) dg ReadFile
+    69 0000003B 6A00                    push dword 0 				;; parameter ke 5 dari ReadFile() adalah 0 
+    70 0000003D 68[6B000000]            push dword iBytes 			;; parameter ke 4 jumlah byte yg sesungguhnya terbaca (TERMASUK ENTER)
+    71 00000042 FF35[5B000000]          push dword [buff_len] 		;; parameter ke 3 panjang buffer yg disediakan
+    72 00000048 68[4B000000]            push dword buff 			;; parameter ke 2 buffer untuk menyimpan string yg dibaca 
+    73 0000004D FF35[63000000]          push dword [hStdIn] 		;; parameter ke 1 handle stdin
+    74 00000053 FF15[00000000]          call [ReadFile] 			
+    75 00000059 C3                      ret
+    76                                   

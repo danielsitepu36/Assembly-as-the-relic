@@ -1,0 +1,21 @@
+     1                                  SEGMENT .DATA 
+     2 00000000 0500                    data1 dw 0005
+     3 00000002 0F00                    data2 dw 0015
+     4 00000004 0000                    hasil dw 0
+     5                                  
+     6                                  SEGMENT .CODE 
+     7                                  ..start:
+     8 00000000 A1[0000]                	MOV AX, [data1]
+     9 00000003 8B1E[0200]              	MOV BX, [data2]
+    10                                  
+    11 00000007 FF16[0F00]              	CALL [tambahkan]
+    12                                  
+    13 0000000B A3[0400]                        MOV [hasil], AX
+    14                                  	
+    15                                  	
+    16 0000000E C3                      RET
+    17                                  
+    18                                  tambahkan:
+    19                                  
+    20 0000000F 01D8                    	ADD AX, BX
+    21 00000011 C3                              RET

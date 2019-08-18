@@ -1,0 +1,390 @@
+     1                                  %INCLUDE "winAPI.inc" ;;Declare external procedure {winapi} in file winAPI.inc
+     1                              <1> extern ExitProcess
+     2                              <1> extern AllocConsole 
+     3                              <1> extern FreeConsole 
+     4                              <1> extern SetConsoleTitleA 
+     5                              <1> extern Sleep 
+     6                              <1> extern GetStdHandle
+     7                              <1> extern ReadFile
+     8                              <1> extern WriteFile
+     9                              <1> 
+    10                              <1> import ExitProcess		kernel32.dll
+    11                              <1> import AllocConsole		kernel32.dll 
+    12                              <1> import FreeConsole		kernel32.dll 
+    13                              <1> import SetConsoleTitleA		kernel32.dll 
+    14                              <1> import Sleep 			kernel32.dll
+    15                              <1> import GetStdHandle 		kernel32.dll
+    16                              <1> import ReadFile			kernel32.dll
+    17                              <1> import WriteFile		kernel32.dll
+     2                                  
+     3                                  SEGMENT .DATA use32
+     4 00000000 4D494B524F50524F53-     Title   	    db "MIKROPROSESOR DANIEL - 18290",0 
+     4 00000009 45534F522044414E49-
+     4 00000012 454C202D2031383239-
+     4 0000001B 3000               
+     5                                  
+     6 0000001D 0D0A2D2D2D44616E69-     msg0 			db 13,10,"---Daniel Suranta S / 18-424185-PA-18290---",0
+     6 00000026 656C20537572616E74-
+     6 0000002F 612053202F2031382D-
+     6 00000038 3432343138352D5041-
+     6 00000041 2D31383239302D2D2D-
+     6 0000004A 00                 
+     7 0000004B 2E000000                msg0_len 		dd $-msg0
+     8                                  
+     9 0000004F 0D0A54554C49532054-     msg1 			db 13,10,"TULIS TEXT (Selesai? Enter)   : ",0
+     9 00000058 455854202853656C65-
+     9 00000061 7361693F20456E7465-
+     9 0000006A 72292020203A2000   
+    10 00000072 23000000                msg1_len 	    dd $-msg1
+    11                                  
+    12 00000076 0D0A55424148204B45-     msg2 			db 13,10,"UBAH KE HURUF BESAR           : ",0
+    12 0000007F 204855525546204245-
+    12 00000088 534152202020202020-
+    12 00000091 20202020203A2000   
+    13 00000099 23000000                msg2_len 	    dd $-msg2 
+    14                                  
+    15 0000009D 0D0A444942414C494B-     msg3 			db 13,10,"DIBALIK MENJADI               : ",0
+    15 000000A6 204D454E4A41444920-
+    15 000000AF 202020202020202020-
+    15 000000B8 20202020203A2000   
+    16 000000C0 23000000                msg3_len 	    dd $-msg3
+    17                                  
+    18 000000C4 0D0A4A554D4C414820-     msg4 			db 13,10,"JUMLAH CHARACTER (TANPA SPASI): ",0
+    18 000000CD 434841524143544552-
+    18 000000D6 202854414E50412053-
+    18 000000DF 50415349293A2000   
+    19 000000E7 23000000                msg4_len 	    dd $-msg4
+    20                                  
+    21 000000EB 0D0A0D0A4A554D4C41-     msg5 			db 13,10,13,10,"JUMLAH KATA                   : ",0
+    21 000000F4 48204B415441202020-
+    21 000000FD 202020202020202020-
+    21 00000106 202020202020203A20-
+    21 0000010F 00                 
+    22 00000110 25000000                msg5_len 	    dd $-msg5
+    23                                  
+    24 00000114 0D0A0D0A544552494D-     msg6 			db 13,10,13,10,"TERIMA KASIH",13,10,0
+    24 0000011D 41204B415349480D0A-
+    24 00000126 00                 
+    25 00000127 13000000                msg6_len 	    dd $-msg6
+    26                                  
+    27 0000012B 0D0A3D3D3D3D3D3D3D-     deco			db 13,10,"===========================================",0
+    27 00000134 3D3D3D3D3D3D3D3D3D-
+    27 0000013D 3D3D3D3D3D3D3D3D3D-
+    27 00000146 3D3D3D3D3D3D3D3D3D-
+    27 0000014F 3D3D3D3D3D3D3D3D3D-
+    27 00000158 00                 
+    28 00000159 2E000000                deco_len		dd $-deco
+    29                                  
+    30 0000015D <res 000000FF>          buff		resb 255
+    31 0000025C FF000000                buff_len	dd 255
+    32                                  
+    33 00000260 <res 000000FF>          words		resb 255
+    34 0000035F 0A000000                words_len	dd 10
+    35                                  
+    36 00000363 <res 000000FF>          char		resb 255
+    37 00000462 0A000000                char_len	dd 10
+    38                                  
+    39                                  SEGMENT .BSS  use32
+    40 00000000 <res 00000004>          hStdOut		resd 1 
+    41 00000004 <res 00000004>          hStdIn		resd 1 
+    42 00000008 <res 00000004>          nBytes		resd 1
+    43 0000000C <res 00000004>          iBytes		resd 1
+    44                                  
+    45                                  
+    46                                  SEGMENT .CODE use32	
+    47                                  ..start:
+    48                                  
+    49 00000000 FF15[00000000]          call [AllocConsole] 
+    50 00000006 68[00000000]            push dword Title 
+    51 0000000B FF15[00000000]          call [SetConsoleTitleA] 
+    52                                  	
+    53 00000011 6AF5                    push dword -11 			;; STD_OUTPUT_HANDLE = -11.
+    54 00000013 FF15[00000000]          call [GetStdHandle] 
+    55 00000019 A3[00000000]            mov dword [hStdOut], eax 
+    56                                  
+    57 0000001E 6AF6                    push dword -10			;; STD_INPUT_HANDLE = -10 
+    58 00000020 FF15[00000000]          call [GetStdHandle] 
+    59 00000026 A3[04000000]            mov dword [hStdIn], eax
+    60                                  
+    61 0000002B 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    62 0000002D 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    63 00000032 FF35[59010000]          push dword [deco_len] 	;; parameter ke 3 panjang string
+    64 00000038 68[2B010000]            push dword deco		;; parameter ke 2 string yang akan ditampilkan
+    65 0000003D FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+    66 00000043 FF15[00000000]          call [WriteFile] 
+    67                                  
+    68 00000049 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    69 0000004B 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    70 00000050 FF35[4B000000]          push dword [msg0_len] 	;; parameter ke 3 panjang string
+    71 00000056 68[1D000000]            push dword msg0			;; parameter ke 2 string yang akan ditampilkan
+    72 0000005B FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+    73 00000061 FF15[00000000]          call [WriteFile] 
+    74                                  
+    75 00000067 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    76 00000069 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    77 0000006E FF35[59010000]          push dword [deco_len] 	;; parameter ke 3 panjang string
+    78 00000074 68[2B010000]            push dword deco		;; parameter ke 2 string yang akan ditampilkan
+    79 00000079 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+    80 0000007F FF15[00000000]          call [WriteFile] 
+    81                                  
+    82 00000085 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+    83 00000087 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+    84 0000008C FF35[72000000]          push dword [msg1_len] 	;; parameter ke 3 panjang string
+    85 00000092 68[4F000000]            push dword msg1			;; parameter ke 2 string yang akan ditampilkan
+    86 00000097 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+    87 0000009D FF15[00000000]          call [WriteFile] 				
+    88                                  
+    89 000000A3 6A00                    push dword 0 			;; parameter ke 5 dari ReadFile() adalah 0 
+    90 000000A5 68[0C000000]            push dword iBytes 		;; parameter ke 4 jumlah byte yg sesungguhnya terbaca
+    91 000000AA FF35[5C020000]          push dword [buff_len] 	;; parameter ke 3 panjang buffer yg disediakan
+    92 000000B0 68[5D010000]            push dword buff 		;; parameter ke 2 buffer untuk menyimpan string yg dibaca 
+    93 000000B5 FF35[04000000]          push dword [hStdIn] 	;; parameter ke 1 handle stdin
+    94 000000BB FF15[00000000]          call [ReadFile] 
+    95                                  
+    96 000000C1 833D[0C000000]02        cmp dword [iBytes],2    ;; Jika hanya ditekan Enter (2 char) maka Exit
+    97 000000C8 0F845A010000            je EXIT	
+    98                                  
+    99 000000CE 8B0D[0C000000]          mov ECX, [iBytes]		;; iBytes menyimpan panjang string yang dituliskan, termasuk Enter (2 bytes: 13,10)
+   100 000000D4 83E902                  sub ECX, 2
+   101                                  
+   102 000000D7 BB[5D010000]            mov EBX, dword buff
+   103 000000DC 29D2                    sub EDX, EDX			;;untuk menyimpan jumlah spasi/kata/cluster
+   104 000000DE 29FF                    sub EDI, EDI			;;untuk menyimpan jumlah char
+   105                                  
+   106                                  ;; Convert to Uppercase
+   107                                  TOUPPER:
+   108 000000E0 803B61                  	 cmp byte [EBX], 97					;;cek jika dibawah 97 tidak di UPPERCASE
+   109 000000E3 7C08                    	 jl NOTWORD
+   110 000000E5 803B7A                  	 cmp byte [EBX], 122				;;cek jika diatas 122 tidak di UPPERCASE
+   111 000000E8 7F03                    	 jg NOTWORD
+   112 000000EA 802B20                  	 sub byte [EBX],32					;;Jika benar huruf kecil, UPPERCASE
+   113                                  	 NOTWORD:
+   114 000000ED 803B20                  	 	cmp byte [EBX], 32				;;cek spasi
+   115 000000F0 750A                    	 	jne NOTSPACE
+   116 000000F2 43                      	 		inc EBX						;;cek Data[i+1] untuk menghitung cluster
+   117 000000F3 803B20                  			cmp byte[EBX],32			;;apabila Data[i+1]=spasi, belum dihitung cluster
+   118 000000F6 7401                    			je SPACEAGAIN
+   119 000000F8 42                      			inc EDX						;;tambah jumlah cluster jika spasi sudah habis
+   120                                  			SPACEAGAIN:
+   121 000000F9 4B                      				dec EBX
+   122 000000FA EB01                    				jmp SPACE
+   123                                  	 	NOTSPACE:
+   124 000000FC 47                           		inc EDI						;;increment jumlah char
+   125                                  			 	SPACE:
+   126 000000FD 43                           			inc EBX						;;increment data (i++)
+   127 000000FE E2E0                         LOOP TOUPPER
+   128                                  
+   129 00000100 83C302                  add EBX,2
+   130 00000103 C60300                  mov byte [EBX], 0
+   131                                  
+   132                                  
+   133 00000106 E827010000              call countWordNChar		;; Fungsi menghitung jumlah char dan kata & convert to string
+   134                                  
+   135                                  
+   136                                  ;; Print uppercase
+   137 0000010B 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   138 0000010D 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   139 00000112 FF35[99000000]          push dword [msg2_len] 	;; parameter ke 3 panjang string
+   140 00000118 68[76000000]            push dword msg2			;; parameter ke 2 string yang akan ditampilkan
+   141 0000011D FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   142 00000123 FF15[00000000]          call [WriteFile] 				
+   143                                  
+   144 00000129 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   145 0000012B 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   146 00000130 FF35[0C000000]          push dword [iBytes] 	;; parameter ke 3 panjang string
+   147 00000136 68[5D010000]            push dword buff			;; parameter ke 2 string yang akan ditampilkan
+   148 0000013B FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   149 00000141 FF15[00000000]          call [WriteFile] 				
+   150                                  ;; Print uppercase
+   151                                  
+   152                                  ;; REVERSE
+   153 00000147 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   154 00000149 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   155 0000014E FF35[C0000000]          push dword [msg3_len] 	;; parameter ke 3 panjang string
+   156 00000154 68[9D000000]            push dword msg3			;; parameter ke 2 string yang akan ditampilkan
+   157 00000159 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   158 0000015F FF15[00000000]          call [WriteFile] 
+   159                                  
+   160                                  
+   161 00000165 E850010000              call REVERSE			;; Call Reverse Function to reverse buff
+   162                                  
+   163                                  
+   164                                  ;; Print reversed
+   165 0000016A 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   166 0000016C 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   167 00000171 FF35[0C000000]          push dword [iBytes] 	;; parameter ke 3 panjang string
+   168 00000177 68[5D010000]            push dword buff			;; parameter ke 2 string yang akan ditampilkan
+   169 0000017C FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   170 00000182 FF15[00000000]          call [WriteFile] 	
+   171                                  
+   172                                  ;; Print jumlah karakter & kata
+   173 00000188 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   174 0000018A 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   175 0000018F FF35[E7000000]          push dword [msg4_len] 	;; parameter ke 3 panjang string
+   176 00000195 68[C4000000]            push dword msg4			;; parameter ke 2 string yang akan ditampilkan
+   177 0000019A FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   178 000001A0 FF15[00000000]          call [WriteFile]
+   179                                  
+   180 000001A6 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   181 000001A8 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   182 000001AD FF35[62040000]          push dword [char_len] 	;; parameter ke 3 panjang string
+   183 000001B3 68[63030000]            push dword char			;; parameter ke 2 string yang akan ditampilkan
+   184 000001B8 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   185 000001BE FF15[00000000]          call [WriteFile]
+   186                                  
+   187 000001C4 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   188 000001C6 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   189 000001CB FF35[10010000]          push dword [msg5_len] 	;; parameter ke 3 panjang string
+   190 000001D1 68[EB000000]            push dword msg5			;; parameter ke 2 string yang akan ditampilkan
+   191 000001D6 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   192 000001DC FF15[00000000]          call [WriteFile] 	      
+   193                                  
+   194 000001E2 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   195 000001E4 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   196 000001E9 FF35[5F030000]          push dword [words_len] 	;; parameter ke 3 panjang string
+   197 000001EF 68[60020000]            push dword words		;; parameter ke 2 string yang akan ditampilkan
+   198 000001F4 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   199 000001FA FF15[00000000]          call [WriteFile]
+   200                                  
+   201 00000200 6A00                    push dword 0 			;; parameter ke 5 dari WriteFile() adalah 0 
+   202 00000202 68[08000000]            push dword nBytes		;; parameter ke 4 jumlah byte yg sesungguhnya tertulis
+   203 00000207 FF35[27010000]          push dword [msg6_len] 	;; parameter ke 3 panjang string
+   204 0000020D 68[14010000]            push dword msg6 		;; parameter ke 2 string yang akan ditampilkan
+   205 00000212 FF35[00000000]          push dword [hStdOut] 	;; parameter ke 1 handle stdout
+   206 00000218 FF15[00000000]          call [WriteFile] 	      
+   207                                  
+   208 0000021E E8BE000000              call CLEAR				;; memanggil fungsi clear untuk membersihkan string char dan words
+   209                                  
+   210 00000223 E9D8FDFFFF              jmp ..start				;; Looping untuk string baru
+   211                                  
+   212                                  EXIT: 
+   213 00000228 6A00                    push 0
+   214 0000022A FF15[00000000]          call [ExitProcess]
+   215 00000230 C9                      leave
+   216 00000231 C3                      RET
+   217                                  
+   218                                  
+   219                                  ; KUMPULAN FUNGSI
+   220                                  ;-------------------------------------------------------------------------------------
+   221                                  ;;FUNGSI MENGHITUNG WORD & CHAR, CONVERT TO STRING
+   222                                  countWordNChar:
+   223                                  	;; Count chars
+   224 00000232 89D6                    	mov ESI, EDX
+   225 00000234 83C601                  	add ESI, 1
+   226 00000237 89F8                    	mov EAX, EDI
+   227 00000239 BF[63030000]            	mov EDI, dword char
+   228                                  
+   229                                  	;; Convert sum of character to string
+   230 0000023E BB0A000000              	mov EBX, 10
+   231 00000243 29D2                    	sub EDX, EDX
+   232                                  	characterTOSTRING:
+   233 00000245 F7F3                    		div EBX
+   234 00000247 83C230                  		add EDX, 48
+   235 0000024A 8917                    		mov dword [EDI], EDX
+   236 0000024C 29D2                    		sub EDX, EDX
+   237 0000024E 47                      		inc EDI
+   238 0000024F 83F800                  		cmp EAX, 0
+   239 00000252 7402                    		je NEXT1
+   240 00000254 EBEF                    		jmp characterTOSTRING
+   241                                  
+   242                                  	;; Count words
+   243                                  	NEXT1:
+   244 00000256 89F0                    	mov EAX, ESI
+   245 00000258 BE[60020000]            	mov ESI, dword words
+   246 0000025D 29D2                    	sub EDX, EDX
+   247 0000025F BB0A000000              	mov EBX, 10
+   248                                  
+   249                                  	;; Convert sum of word to string
+   250                                  	wordTOSTRING:
+   251 00000264 83F800                  		cmp EAX, 0
+   252 00000267 740C                    		je NEXT2
+   253 00000269 F7F3                    		div EBX
+   254 0000026B 83C230                  		add EDX, 48
+   255 0000026E 8916                    		mov dword [ESI], EDX
+   256 00000270 29D2                    		sub EDX, EDX
+   257 00000272 46                      		inc ESI
+   258 00000273 EBEF                    		jmp wordTOSTRING
+   259                                  
+   260                                  	;; Reverse string char
+   261                                  	NEXT2:
+   262 00000275 B90A000000              	mov ECX, 10
+   263 0000027A B8[63030000]            	mov EAX, dword char
+   264 0000027F 89C6                    	mov ESI, EAX
+   265 00000281 01C8                    	add EAX, ECX
+   266 00000283 89C7                    	mov EDI, EAX
+   267 00000285 4F                      	dec EDI
+   268 00000286 D1E9                    	shr ECX, 1
+   269 00000288 740D                    	jz NEXT3
+   270                                  	reverseTotalChar:
+   271 0000028A 8A06                    		mov AL, byte [ESI]
+   272 0000028C 8A1F                    		mov BL, byte [EDI]
+   273 0000028E 881E                    		mov byte [ESI], BL 
+   274 00000290 8807                    		mov byte [EDI], AL
+   275 00000292 46                      		inc ESI
+   276 00000293 4F                      		dec EDI
+   277 00000294 49                      		dec ECX
+   278 00000295 75F3                    		jnz reverseTotalChar
+   279                                  
+   280                                  	;; Reverse string words
+   281                                  	NEXT3:
+   282 00000297 B90A000000              	mov ECX, 10
+   283 0000029C B8[60020000]            	mov EAX, dword words
+   284 000002A1 89C6                    	mov ESI, EAX
+   285 000002A3 01C8                    	add EAX, ECX
+   286 000002A5 89C7                    	mov EDI, EAX
+   287 000002A7 4F                      	dec EDI
+   288 000002A8 D1E9                    	shr ECX, 1
+   289 000002AA 740D                    	jz STOP
+   290                                  	reverseTotalWords:
+   291 000002AC 8A06                    		mov AL, byte [ESI]
+   292 000002AE 8A1F                    		mov BL, byte [EDI]
+   293 000002B0 881E                    		mov byte [ESI], BL 
+   294 000002B2 8807                    		mov byte [EDI], AL
+   295 000002B4 46                      		inc ESI
+   296 000002B5 4F                      		dec EDI
+   297 000002B6 49                      		dec ECX
+   298 000002B7 75F3                    		jnz reverseTotalWords
+   299                                  
+   300                                  	;; Count word and character end
+   301                                  STOP:
+   302 000002B9 C3                      RET
+   303                                  
+   304                                  ;; FUNGSI REVERSE
+   305                                  REVERSE:
+   306 000002BA 8B0D[0C000000]          	mov ECX, [iBytes]
+   307 000002C0 83E902                  	sub ECX, 2
+   308 000002C3 B8[5D010000]            	mov EAX, dword buff
+   309 000002C8 89C6                    	mov ESI, EAX
+   310 000002CA 01C8                    	add EAX, ECX
+   311 000002CC 89C7                    	mov EDI, EAX
+   312 000002CE 4F                      	dec EDI
+   313 000002CF D1E9                    	shr ECX, 1
+   314 000002D1 740D                    	jz REVERSED
+   315                                  	rev:
+   316 000002D3 8A06                    		mov AL, byte [ESI]
+   317 000002D5 8A1F                    		mov BL, byte [EDI]
+   318 000002D7 881E                    		mov byte [ESI], BL 
+   319 000002D9 8807                    		mov byte [EDI], AL
+   320 000002DB 46                      		inc ESI
+   321 000002DC 4F                      		dec EDI
+   322 000002DD 49                      		dec ECX
+   323 000002DE 75F3                    		jnz rev
+   324                                  REVERSED:
+   325 000002E0 C3                      RET
+   326                                  
+   327                                  ;;FUNGSI CLEAR
+   328                                  CLEAR:
+   329                                  	;;Clear char & words untuk loop selanjutnya
+   330 000002E1 29D2                    	sub EDX, EDX
+   331 000002E3 BF[63030000]            	mov EDI, dword char
+   332 000002E8 BE[60020000]            	mov ESI, dword words
+   333 000002ED 83C20A                  	add EDX, 10
+   334                                  	CLR:
+   335 000002F0 C60700                  		mov byte[EDI],0
+   336 000002F3 C60600                  		mov byte[ESI],0
+   337 000002F6 47                      		inc EDI
+   338 000002F7 46                      		inc ESI
+   339 000002F8 4A                      		dec EDX
+   340 000002F9 83FA00                  		cmp EDX,0
+   341 000002FC 75F2                    		jnz CLR
+   342 000002FE C3                      RET
